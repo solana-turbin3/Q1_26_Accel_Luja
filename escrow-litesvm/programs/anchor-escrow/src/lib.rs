@@ -2,9 +2,9 @@
 #![allow(deprecated)]
 
 use anchor_lang::prelude::*;
-
-mod state;
+mod error;
 mod instructions;
+mod state;
 mod tests;
 
 use instructions::*;
@@ -25,6 +25,7 @@ pub mod anchor_escrow {
     }
 
     pub fn take(ctx: Context<Take>) -> Result<()> {
+        ctx.accounts.validate_time()?;
         ctx.accounts.deposit()?;
         ctx.accounts.withdraw_and_close_vault()
     }

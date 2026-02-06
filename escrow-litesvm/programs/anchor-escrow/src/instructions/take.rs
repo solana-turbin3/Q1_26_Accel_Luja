@@ -1,7 +1,16 @@
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token_interface::{Mint, TokenAccount, TokenInterface, TransferChecked, transfer_checked, CloseAccount, close_account}};
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token_interface::{
+        close_account, transfer_checked, CloseAccount, Mint, TokenAccount, TokenInterface,
+        TransferChecked,
+    },
+};
 
-use crate::state::Escrow;
+use crate::{
+    error::EscrowError,
+    state::{Escrow, MIN_TIME_BEFORE_TAKE},
+};
 
 //Create context
 #[derive(Accounts)]
@@ -57,6 +66,13 @@ pub struct Take<'info> {
 //Transfer tokens from vault to taker
 //Close vault account
 impl<'info> Take<'info> {
+    pub fn validate_time(&mut self) -> Result<()> {
+        let now = Clock::get()?.unix_timestamp;
+        let unlock_time = self.escrow.created_at + MIN_TIME_BEFORE_TAKE;
+        require!(unlock_time <= now, EscrowError::MinTimeNotPassed);
+        Ok(())
+    }
+
     pub fn deposit(&mut self) -> Result<()> {
         let cpi_program = self.token_program.to_account_info();
 
@@ -77,7 +93,7 @@ impl<'info> Take<'info> {
             b"escrow",
             self.maker.key.as_ref(),
             &self.escrow.seed.to_le_bytes()[..],
-            &[self.escrow.bump]
+            &[self.escrow.bump],
         ]];
 
         let cpi_program = self.token_program.to_account_info();

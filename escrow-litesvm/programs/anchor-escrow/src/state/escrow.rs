@@ -8,5 +8,9 @@ pub struct Escrow {
     pub mint_a: Pubkey,
     pub mint_b: Pubkey,
     pub receive: u64,
+    pub created_at: i64,
     pub bump: u8,
 }
+
+#[constant]
+pub const MIN_TIME_BEFORE_TAKE: i64 = 5 * 24 * 60 * 60;
