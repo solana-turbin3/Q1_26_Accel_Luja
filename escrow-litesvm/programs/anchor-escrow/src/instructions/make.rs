@@ -66,9 +66,7 @@ impl<'info> Make<'info> {
         };
 
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-
         transfer_checked(cpi_ctx, deposit, self.mint_a.decimals)?;
-
         Ok(())
     }
 }

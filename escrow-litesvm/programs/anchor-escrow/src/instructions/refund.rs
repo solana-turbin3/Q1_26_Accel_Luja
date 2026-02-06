@@ -1,10 +1,9 @@
+use crate::state::Escrow;
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{
     close_account, transfer_checked, CloseAccount, Mint, TokenAccount, TokenInterface,
     TransferChecked,
 };
-
-use crate::state::Escrow;
 
 #[derive(Accounts)]
 pub struct Refund<'info> {
@@ -46,7 +45,6 @@ impl<'info> Refund<'info> {
         ]];
 
         let cpi_program = self.token_program.to_account_info();
-
         let cpi_accounts = TransferChecked {
             from: self.vault.to_account_info(),
             to: self.maker_ata_a.to_account_info(),
@@ -59,7 +57,6 @@ impl<'info> Refund<'info> {
         transfer_checked(cpi_context, self.vault.amount, self.mint_a.decimals)?;
 
         let cpi_program = self.token_program.to_account_info();
-
         let cpi_accounts = CloseAccount {
             account: self.vault.to_account_info(),
             destination: self.maker.to_account_info(),
@@ -67,7 +64,6 @@ impl<'info> Refund<'info> {
         };
 
         let cpi_context = CpiContext::new_with_signer(cpi_program, cpi_accounts, &signer_seeds);
-
         close_account(cpi_context)?;
 
         Ok(())

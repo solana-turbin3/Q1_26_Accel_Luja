@@ -75,14 +75,12 @@ impl<'info> Take<'info> {
 
     pub fn deposit(&mut self) -> Result<()> {
         let cpi_program = self.token_program.to_account_info();
-
         let cpi_accounts = TransferChecked {
             from: self.taker_ata_b.to_account_info(),
             to: self.maker_ata_b.to_account_info(),
             authority: self.taker.to_account_info(),
             mint: self.mint_b.to_account_info(),
         };
-
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
         transfer_checked(cpi_ctx, self.escrow.receive, self.mint_b.decimals)
@@ -97,26 +95,22 @@ impl<'info> Take<'info> {
         ]];
 
         let cpi_program = self.token_program.to_account_info();
-
         let cpi_accounts = TransferChecked {
             from: self.vault.to_account_info(),
             to: self.taker_ata_a.to_account_info(),
             authority: self.escrow.to_account_info(),
             mint: self.mint_a.to_account_info(),
         };
-
         let cpi_context = CpiContext::new_with_signer(cpi_program, cpi_accounts, &signer_seeds);
 
         transfer_checked(cpi_context, self.vault.amount, self.mint_a.decimals)?;
 
         let cpi_program = self.token_program.to_account_info();
-
         let cpi_accounts = CloseAccount {
             account: self.vault.to_account_info(),
             destination: self.maker.to_account_info(),
             authority: self.escrow.to_account_info(),
         };
-
         let cpi_context = CpiContext::new_with_signer(cpi_program, cpi_accounts, &signer_seeds);
 
         close_account(cpi_context)
