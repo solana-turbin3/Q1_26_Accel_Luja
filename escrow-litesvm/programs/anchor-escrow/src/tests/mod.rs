@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod test {
     use {
         anchor_lang::{
             prelude::{msg, Clock},
