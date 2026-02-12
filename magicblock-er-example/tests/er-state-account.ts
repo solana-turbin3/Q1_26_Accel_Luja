@@ -4,6 +4,14 @@ import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { GetCommitmentSignature } from "@magicblock-labs/ephemeral-rollups-sdk";
 import { ErStateAccount } from "../target/types/er_state_account";
 
+const DEFAULT_QUEUE = new PublicKey(
+  "Cuj97ggrhhidhbu39TijNVqE74xvKJ69gDervRUXAxGh"
+);
+const DEFAULT_EPHEMERAL_QUEUE = new PublicKey(
+  "5hBR571xnXppuCPveTrctfTU7tJLSN94nq7kv7FRK5Tc"
+);
+
+
 describe("er-state-account", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
@@ -54,6 +62,17 @@ describe("er-state-account", () => {
     console.log("User Account initialized: ", tx);
   });
 
+  it("Request randomness in base layer!", async () => {
+    const tx=await program.methods.requestRandomness(1).accountsPartial({oracleQueue:DEFAULT_QUEUE}).rpc({skipPreflight:true});
+    console.log("\nRandomness requested in base layer: ", tx);
+
+    console.log("Waiting for oracle callback...");
+    await new Promise((resolve) => setTimeout(resolve, 60000));
+
+    const account = await program.account.userAccount.fetch(userAccount);
+    console.log("Randomness received: ", account.data.toString());
+  });
+
   it("Update State!", async () => {
     const tx = await program.methods
       .update(new anchor.BN(42))
@@ -77,6 +96,28 @@ describe("er-state-account", () => {
       .rpc({ skipPreflight: true });
 
     console.log("\nUser Account Delegated to Ephemeral Rollup: ", tx);
+  });
+
+  it("Request randomness in Ephemeral Rollup!", async () => {
+    const ephemeralProgram=new anchor.Program(program.idl,providerEphemeralRollup);
+
+    let tx=await ephemeralProgram.methods.requestRandomness(1).accountsPartial({oracleQueue:DEFAULT_EPHEMERAL_QUEUE}).transaction();
+
+    tx.feePayer=providerEphemeralRollup.wallet.publicKey;
+    tx.recentBlockhash=(await providerEphemeralRollup.connection.getLatestBlockhash()).blockhash;
+    tx=await providerEphemeralRollup.wallet.signTransaction(tx);
+    const txHash=await providerEphemeralRollup.sendAndConfirm(tx,[],{skipPreflight:true});
+
+    console.log("\nRandomness requested in Ephemeral Rollup: ", txHash);
+
+    console.log("Waiting for oracle callback...");
+    await new Promise((resolve) => setTimeout(resolve, 60000));
+    const accountInfo=await providerEphemeralRollup.connection.getAccountInfo(userAccount);
+
+    if(accountInfo){
+      const randomValue=new anchor.BN(accountInfo.data.slice(40,48),'le');
+      console.log("Randomness received in Ephemeral Rollup: ", randomValue.toString());
+    }
   });
 
   it("Update State and Commit to Base Layer!", async () => {
