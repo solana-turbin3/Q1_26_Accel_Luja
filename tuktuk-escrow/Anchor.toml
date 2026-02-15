@@ -5,15 +5,16 @@ package_manager = "yarn"
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-tuktuk_escrow = "6Nn5wecQ6P1PABEd4MrAQAiQz1WN4CTTKcU7DK4VkBs3"
+[programs.devnet]
+tuktuk_escrow = "GQcUgjuH7CXKXC6N7w4T5xyLYCUbSa2tCe2goRqtxjio"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 \"tests/**/*.ts\""
+cron = "yarn run ts-node -P ./tsconfig.json cron/cron.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

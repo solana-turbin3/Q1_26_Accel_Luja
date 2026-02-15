@@ -1,16 +1,37 @@
-use anchor_lang::prelude::*;
+#![allow(unexpected_cfgs)]
+#![allow(deprecated)]
 
-declare_id!("6Nn5wecQ6P1PABEd4MrAQAiQz1WN4CTTKcU7DK4VkBs3");
+use anchor_lang::prelude::*;
+mod error;
+mod instructions;
+mod state;
+
+use instructions::*;
+declare_id!("GQcUgjuH7CXKXC6N7w4T5xyLYCUbSa2tCe2goRqtxjio");
 
 #[program]
 pub mod tuktuk_escrow {
     use super::*;
+    pub fn make(ctx: Context<Make>, seed: u64, deposit: u64, receive: u64) -> Result<()> {
+        ctx.accounts.init_escrow(seed, receive, &ctx.bumps)?;
+        ctx.accounts.deposit(deposit)
+    }
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
-        Ok(())
+    pub fn refund(ctx: Context<Refund>) -> Result<()> {
+        ctx.accounts.refund_and_close_vault()
+    }
+
+    pub fn take(ctx: Context<Take>) -> Result<()> {
+        ctx.accounts.validate_time()?;
+        ctx.accounts.deposit()?;
+        ctx.accounts.withdraw_and_close_vault()
+    }
+
+    pub fn auto_refund(ctx: Context<AutoRefund>) -> Result<()> {
+        ctx.accounts.refund_and_close_vault()
+    }
+
+    pub fn schedule(ctx: Context<Schedule>, task_id: u16) -> Result<()> {
+        ctx.accounts.schedule(task_id, ctx.bumps)
     }
 }
-
-#[derive(Accounts)]
-pub struct Initialize {}
