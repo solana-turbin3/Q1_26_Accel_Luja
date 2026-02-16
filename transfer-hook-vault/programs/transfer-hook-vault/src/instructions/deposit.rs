@@ -1,18 +1,17 @@
+use crate::{
+    constant::{USER_SEED, VAULT_SEED},
+    error::TransferError,
+    state::{User, Vault},
+};
 use anchor_lang::prelude::*;
+use anchor_lang::system_program::{transfer, Transfer};
 use anchor_spl::{
     associated_token::AssociatedToken,
     token_2022::{mint_to_checked, MintToChecked},
     token_interface::{Mint, TokenAccount, TokenInterface},
 };
 
-use crate::{
-    constant::{USER_SEED, VAULT_SEED},
-    error::TransferError,
-    state::{User, Vault},
-};
-
 #[derive(Accounts)]
-#[instruction(user:Pubkey)]
 pub struct Deposit<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
@@ -52,9 +51,16 @@ impl<'info> Deposit<'info> {
             TransferError::Unauthorized
         );
 
-        **self.vault.to_account_info().try_borrow_mut_lamports()? += amount;
-        **self.user.to_account_info().try_borrow_mut_lamports()? -= amount;
-
+        transfer(
+            CpiContext::new(
+                self.system_program.to_account_info(),
+                Transfer {
+                    from: self.user.to_account_info(),
+                    to: self.vault.to_account_info(),
+                },
+            ),
+            amount,
+        )?;
         let admin_key = self.vault.admin.key();
         let vault_signer_seeds: &[&[&[u8]]] =
             &[&[VAULT_SEED, admin_key.as_ref(), &[self.vault.bump]]];

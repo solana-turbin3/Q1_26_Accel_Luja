@@ -1,3 +1,8 @@
+use crate::{
+    constant::{USER_SEED, VAULT_SEED},
+    error::TransferError,
+    state::{User, Vault},
+};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
@@ -5,14 +10,7 @@ use anchor_spl::{
     token_interface::{Mint, TokenAccount, TokenInterface},
 };
 
-use crate::{
-    constant::{USER_SEED, VAULT_SEED},
-    error::TransferError,
-    state::{User, Vault},
-};
-
 #[derive(Accounts)]
-#[instruction(user:Pubkey)]
 pub struct Withdraw<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
@@ -52,9 +50,6 @@ impl<'info> Withdraw<'info> {
             TransferError::Unauthorized
         );
 
-        **self.vault.to_account_info().try_borrow_mut_lamports()? -= amount;
-        **self.user.to_account_info().try_borrow_mut_lamports()? += amount;
-
         let admin_key = self.vault.admin.key();
         let vault_signer_seeds: &[&[&[u8]]] =
             &[&[VAULT_SEED, admin_key.as_ref(), &[self.vault.bump]]];
@@ -65,13 +60,16 @@ impl<'info> Withdraw<'info> {
                 BurnChecked {
                     mint: self.mint.to_account_info(),
                     from: self.user_token_ata.to_account_info(),
-                    authority: self.vault.to_account_info(),
+                    authority: self.user.to_account_info(),
                 },
                 vault_signer_seeds,
             ),
             amount,
             self.mint.decimals,
         )?;
+
+        **self.vault.to_account_info().try_borrow_mut_lamports()? -= amount;
+        **self.user.to_account_info().try_borrow_mut_lamports()? += amount;
         Ok(())
     }
 }

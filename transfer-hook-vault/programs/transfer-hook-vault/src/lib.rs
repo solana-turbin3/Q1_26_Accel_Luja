@@ -6,6 +6,8 @@ mod constant;
 mod error;
 mod instructions;
 mod state;
+#[cfg(test)]
+mod tests;
 use instructions::*;
 use spl_discriminator::SplDiscriminate;
 use spl_tlv_account_resolution::state::ExtraAccountMetaList;
@@ -16,8 +18,9 @@ declare_id!("2vN6sCwT6uYvKjxkdKR7mXTeLRzLagCLMHWv8YcSMMd6");
 pub mod transfer_hook_vault {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        ctx.accounts.initialize(ctx.bumps)
+    pub fn initialize(ctx: Context<Initialize>, fee: u8, decimal: u8) -> Result<()> {
+        ctx.accounts.initialize(ctx.bumps)?;
+        ctx.accounts.init_mint(fee, decimal)
     }
 
     pub fn add_user(ctx: Context<AddUser>, user: Pubkey) -> Result<()> {

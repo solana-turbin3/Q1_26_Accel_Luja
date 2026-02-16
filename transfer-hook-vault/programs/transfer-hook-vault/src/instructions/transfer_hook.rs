@@ -14,7 +14,6 @@ use anchor_spl::{
         TokenAccount
     }
 };
-
 use crate::{constant::USER_SEED, state::User};
 
 #[derive(Accounts)]

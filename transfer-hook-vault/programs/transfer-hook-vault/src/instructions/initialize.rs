@@ -1,5 +1,7 @@
+use crate::{constant::VAULT_SEED, state::Vault};
 use anchor_lang::{
-    prelude::{program::invoke, *},
+    prelude::*,
+    solana_program::program::invoke,
     system_program::{create_account, CreateAccount},
 };
 use anchor_spl::{
@@ -13,8 +15,6 @@ use anchor_spl::{
     },
     token_interface::TokenInterface,
 };
-
-use crate::{constant::VAULT_SEED, state::Vault};
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
@@ -33,12 +33,8 @@ pub struct Initialize<'info> {
     ///CHECK: Mint passed as acount info to be initialized
     #[account(mut, signer)]
     pub mint: AccountInfo<'info>,
-    /// CHECK: ExtraAccountMetaList Account, will be checked by the transfer hook
-    #[account(mut)]
-    pub extra_account_meta_list: UncheckedAccount<'info>,
-
-    pub system_program: Program<'info, System>,
     pub token_program: Interface<'info, TokenInterface>,
+    pub system_program: Program<'info, System>,
 }
 
 impl<'info> Initialize<'info> {
