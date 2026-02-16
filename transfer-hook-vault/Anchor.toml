@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-transfer_hook_vault = "3LAFnxsE3TqNpM1fnbm7NLFiegMognzYn3ukFu4qP1xe"
+transfer_hook_vault = "2vN6sCwT6uYvKjxkdKR7mXTeLRzLagCLMHWv8YcSMMd6"
 
 [registry]
 url = "https://api.apr.dev"
