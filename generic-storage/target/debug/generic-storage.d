@@ -1,0 +1,1 @@
+/home/Luja/code/turbine/generic-storage/target/debug/generic-storage: /home/Luja/code/turbine/generic-storage/src/data_type.rs /home/Luja/code/turbine/generic-storage/src/main.rs /home/Luja/code/turbine/generic-storage/src/serialize.rs
