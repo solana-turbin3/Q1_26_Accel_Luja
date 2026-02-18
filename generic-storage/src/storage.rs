@@ -1,5 +1,6 @@
-use crate::serialize::Serializer;
 use std::{error::Error, marker::PhantomData};
+
+use crate::serialize::Serializer;
 
 pub struct Storage<T, S> {
     pub data: Option<Vec<u8>>,
@@ -8,10 +9,10 @@ pub struct Storage<T, S> {
 }
 
 impl<T, S: Serializer<T>> Storage<T, S> {
-    pub fn new(serialier: S) -> Self {
+    pub fn new(serializer: S) -> Self {
         Storage {
             data: None,
-            serializer: serialier,
+            serializer,
             _phantom: PhantomData,
         }
     }
@@ -27,5 +28,14 @@ impl<T, S: Serializer<T>> Storage<T, S> {
     }
     pub fn has_data(&self) -> Result<bool, Box<dyn Error>> {
         Ok(self.data.is_some())
+    }
+    pub fn convert<NewS: Serializer<T>>(
+        &self,
+        new_serializer: NewS,
+    ) -> Result<Storage<T, NewS>, Box<dyn Error>> {
+        let value = self.load()?;
+        let mut new_storage = Storage::new(new_serializer);
+        new_storage.save(&value)?;
+        Ok(new_storage)
     }
 }

@@ -34,6 +34,8 @@ fn test_with_wincode() {
     };
     let mut storage = Storage::new(Wincode);
     storage.save(&person).unwrap();
-    let loaded = storage.load().unwrap();
+
+    let borsh_storage = storage.convert(Borsh).unwrap();
+    let loaded = borsh_storage.load().unwrap();
     assert_eq!(loaded, person);
 }
