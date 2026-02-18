@@ -1,1 +1,0 @@
-T: wincode::SchemaWrite<wincode::config::Configuration<true, 4194304, wincode::len::UseIntLen<u64, 0>>>

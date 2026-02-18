@@ -1,1 +1,0 @@
-T: wincode::SchemaRead<'_, wincode::config::Configuration<true, 4194304, wincode::len::UseIntLen<u64, 0>>>
