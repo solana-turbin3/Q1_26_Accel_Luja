@@ -20,14 +20,12 @@ pub struct Initialize<'info> {
 
     #[account(mut)]
     pub counter: Account<'info, Counter>,
-    #[account(mut)]
-    pub authority: SystemAccount<'info>,
-    ///CHECK: Checked oracle Id
-    #[account(address=solana_gpt_oracle::ID)]
-    pub oracle_program: AccountInfo<'info>,
     ///CHECK: Checked in oracle program
     #[account(mut)]
     pub llm_context: AccountInfo<'info>,
+    ///CHECK: Checked oracle Id
+    #[account(address=solana_gpt_oracle::ID)]
+    pub oracle_program: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
 
