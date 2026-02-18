@@ -26,13 +26,14 @@ describe("tuktuk-escrow",() => {
   seedBuf.writeBigUInt64LE(BigInt(seed.toString()));
   let escrowPda:PublicKey;
   let vault:PublicKey;
-  
-  
-  const taskQueue = new anchor.web3.PublicKey("CMreFdKxT5oeZhiX8nWTGz9PtXM1AMYTh6dGR2UzdtrA");
+
+  const taskQueue = new anchor.web3.PublicKey("84ndxd9T3mrJnEKXCUT9SMTNRbP6ioEAP4qjax9dVjcf");
   const queueAuthority = anchor.web3.PublicKey.findProgramAddressSync([Buffer.from("queue_authority")], program.programId)[0];
   const taskQueueAuthority = taskQueueAuthorityKey(taskQueue, queueAuthority)[0];
   
   before(async()=>{
+
+  let tuktukProgram = await init(provider);
     mintA=await createMint(connection,payer,payer.publicKey,null,6);
     mintB =await createMint(connection,payer,payer.publicKey,null,6);
     [escrowPda]=PublicKey.findProgramAddressSync([Buffer.from("escrow"),payer.publicKey.toBuffer(),seedBuf],program.programId);
@@ -51,6 +52,14 @@ describe("tuktuk-escrow",() => {
   );
   
   makerAtaA = makerAtaAAddress;
+    let txn = await tuktukProgram.methods
+        .addQueueAuthorityV0()
+        .accounts({
+          payer: payer.publicKey,
+          taskQueue: taskQueue,
+          queueAuthority,
+        })
+        .rpc();
     
   });
   
@@ -74,7 +83,7 @@ describe("tuktuk-escrow",() => {
   let taskId = 10;
   const [taskPda] = taskKey(taskQueue, taskId);
   
-  
+ 
   try {
     const tx = await program.methods.schedule(taskId).accountsPartial({
       maker: payer.publicKey,
