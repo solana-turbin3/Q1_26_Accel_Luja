@@ -20,7 +20,7 @@ describe("tuktuk-gpt-oracle", () => {
     "tuktukUrfhXT6ZT77QTU8RQtvgL967uRuVagWF57zVA"
   );
   const TASK_QUEUE = new PublicKey(
-    "UwdRmurFA11isBpDNY9HNcoL95Pnt4zNYE2cd1SQwn2"
+    "84ndxd9T3mrJnEKXCUT9SMTNRbP6ioEAP4qjax9dVjcf"
   );
 
   const getCounterPda=()=>PublicKey.findProgramAddressSync([Buffer.from("counter")],ORACLE_PROGRAM_ID);
@@ -45,7 +45,6 @@ describe("tuktuk-gpt-oracle", () => {
     const tx = await program.methods.initialize().accountsPartial({
       payer:wallet.publicKey,
       agent:agentPda,
-      authority:wallet.publicKey,
       counter:counterPda,
       llmContext:llmContextPda,
       oracleProgram:ORACLE_PROGRAM_ID,
