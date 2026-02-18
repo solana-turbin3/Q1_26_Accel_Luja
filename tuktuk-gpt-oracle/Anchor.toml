@@ -5,14 +5,14 @@ package_manager = "yarn"
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-tuktuk_gpt_oracle = "daTyZ6QYyTP5QpuM3xG3MtF6XLmYP5GQdnJ6mv1fgdB"
+[programs.devnet]
+tuktuk_gpt_oracle = "FLEusoXstGmdVzxzag4vhiHWrxJYMtoG2su9hqeP99j8"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
