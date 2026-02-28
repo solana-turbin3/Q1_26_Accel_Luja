@@ -12,18 +12,19 @@ use pinocchio_token::instructions::Transfer;
 use crate::states::Escrow;
 
 pub fn process_make_instruction(accounts: &[AccountView], data: &[u8]) -> ProgramResult {
-    let [maker, mint_a, mint_b, escrow_account, maker_ata, escrow_ata, system_program, token_program, _associated_token_program @ ..] =
+    let [maker, mint_a, mint_b, escrow_account, maker_ata_a, escrow_ata, system_program, token_program, _associated_token_program @ ..] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-
-    let maker_ata_state = pinocchio_token::state::TokenAccount::from_account_view(maker_ata)?;
-    if maker_ata_state.owner() != maker.address() {
-        return Err(ProgramError::IllegalOwner);
-    };
-    if maker_ata_state.mint() != mint_a.address() {
-        return Err(ProgramError::InvalidAccountData);
+    {
+        let maker_ata_state = pinocchio_token::state::TokenAccount::from_account_view(maker_ata_a)?;
+        if maker_ata_state.owner() != maker.address() {
+            return Err(ProgramError::IllegalOwner);
+        };
+        if maker_ata_state.mint() != mint_a.address() {
+            return Err(ProgramError::InvalidAccountData);
+        }
     }
     let amounts_to_receive = u64::from_le_bytes(data[0..8].try_into().unwrap());
     let amounts_to_give = u64::from_le_bytes(data[8..16].try_into().unwrap());
@@ -79,7 +80,7 @@ pub fn process_make_instruction(accounts: &[AccountView], data: &[u8]) -> Progra
     .invoke()?;
     Transfer {
         authority: maker,
-        from: maker_ata,
+        from: maker_ata_a,
         to: escrow_ata,
         amount: amounts_to_give,
     }

@@ -8,14 +8,14 @@ use pinocchio_token::instructions::{CloseAccount, Transfer};
 
 use crate::states::Escrow;
 
-pub fn process_take_instruction(accounts: &[AccountView], data: &[u8]) -> ProgramResult {
-    let [maker, taker, escrow_account, maker_ata_b, taker_ata_a, taker_ata_b, escrow_ata, system_program, token_program, _associated_token_program @ ..] =
+pub fn process_take_instruction(accounts: &[AccountView], _data: &[u8]) -> ProgramResult {
+    let [maker, taker, escrow_account, maker_ata_b, taker_ata_a, taker_ata_b, escrow_ata, _remaining_program @ ..] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
-    let (amount_to_give, amount_to_receive, mint_a, mint_b, bump) = {
+    let (amount_to_give, amount_to_receive, bump) = {
         let escrow_state = Escrow::from_account_info(escrow_account)?;
 
         if escrow_state.maker != *maker.address().as_array() {
@@ -24,8 +24,6 @@ pub fn process_take_instruction(accounts: &[AccountView], data: &[u8]) -> Progra
         (
             escrow_state.amount_to_give,
             escrow_state.amount_to_receive,
-            escrow_state.mint_a,
-            escrow_state.mint_b,
             escrow_state.bumps,
         )
     };

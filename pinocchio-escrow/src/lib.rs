@@ -1,4 +1,8 @@
-use pinocchio::{address::declare_id, error::ProgramError, AccountView, Address, ProgramResult};
+#![allow(unexpected_cfgs)]
+
+use pinocchio::{
+    address::declare_id, entrypoint, error::ProgramError, AccountView, Address, ProgramResult,
+};
 
 use crate::instructions::{
     process_make_instruction, process_refund_instruction, process_take_instruction,
@@ -7,10 +11,9 @@ use crate::instructions::{
 
 mod instructions;
 mod states;
-#[cfg(test)]
 mod tests;
 
-// entrypoint!(process_instruction);
+entrypoint!(process_instruction);
 
 declare_id!("99AW8S9fD1QREzbE25W3uwo7DyjQvuzsYDfcdD6GZbVv");
 
@@ -29,7 +32,7 @@ pub fn process_instruction(
         EscrowInstructions::Make => process_make_instruction(accounts, data)?,
         EscrowInstructions::Take => process_take_instruction(accounts, data)?,
         EscrowInstructions::Refund => process_refund_instruction(accounts, data)?,
-        _ => return Err(ProgramError::InvalidInstructionData),
+        _ => return Err(ProgramError::InvalidInstructionData)?,
     };
 
     Ok(())

@@ -11,10 +11,8 @@ use pinocchio_token::{
 
 use crate::states::Escrow;
 
-pub fn process_refund_instruction(accounts: &[AccountView], data: &[u8]) -> ProgramResult {
-    let [maker, maker_ata, escrow_account, escrow_ata, system_program, token_program, _associated_token_program @ ..] =
-        accounts
-    else {
+pub fn process_refund_instruction(accounts: &[AccountView], _data: &[u8]) -> ProgramResult {
+    let [maker, maker_ata_a, escrow_account, escrow_ata, _remaining_program @ ..] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
@@ -28,7 +26,7 @@ pub fn process_refund_instruction(accounts: &[AccountView], data: &[u8]) -> Prog
     };
 
     {
-        let maker_ata_state = TokenAccount::from_account_view(maker_ata)?;
+        let maker_ata_state = TokenAccount::from_account_view(maker_ata_a)?;
         if maker_ata_state.owner() != maker.address() {
             return Err(ProgramError::InvalidAccountData);
         };
@@ -50,7 +48,7 @@ pub fn process_refund_instruction(accounts: &[AccountView], data: &[u8]) -> Prog
 
     Transfer {
         from: escrow_ata,
-        to: maker_ata,
+        to: maker_ata_a,
         authority: escrow_account,
         amount: u64::from_le_bytes(amount_to_give),
     }
