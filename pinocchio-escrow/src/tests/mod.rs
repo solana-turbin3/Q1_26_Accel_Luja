@@ -46,10 +46,6 @@ mod test {
             .send()
             .unwrap();
 
-        let associated_token_program = ASSOCIATED_TOKEN_PROGRAM_ID.parse::<Pubkey>().unwrap();
-        let token_program = TOKEN_PROGRAM_ID;
-        let system_program = solana_sdk_ids::system_program::ID;
-
         MintTo::new(&mut s.svm, &s.maker, &s.mint_b, &taker_ata_b, 1000000000)
             .send()
             .unwrap();
@@ -73,5 +69,31 @@ mod test {
         let recent_blockhash = s.svm.latest_blockhash();
         let transaction: Transaction = Transaction::new(&[&taker], message, recent_blockhash);
         let tx = s.svm.send_transaction(transaction).unwrap();
+
+        // println!("Tx completed:{:?}", tx);
+    }
+
+    #[test]
+    pub fn refund_instruction() {
+        let mut s = make_ix();
+
+        let refund_ix = Instruction {
+            program_id: program_id(),
+            accounts: vec![
+                AccountMeta::new(s.maker.pubkey(), true),
+                AccountMeta::new(s.maker_ata_a, false),
+                AccountMeta::new(s.escrow_pda, false),
+                AccountMeta::new(s.escrow_ata, false),
+                AccountMeta::new(TOKEN_PROGRAM_ID, false),
+            ],
+            data: vec![2u8],
+        };
+
+        let message = Message::new(&[refund_ix], Some(&s.maker.pubkey()));
+        let recent_blockhash = s.svm.latest_blockhash();
+        let transaction = Transaction::new(&[&s.maker], message, recent_blockhash);
+        let tx = s.svm.send_transaction(transaction);
+
+        println!("Tx completed:{:?}", tx);
     }
 }
