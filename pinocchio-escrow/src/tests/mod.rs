@@ -4,17 +4,11 @@ mod helper;
 mod test {
     use std::vec;
 
-    use crate::{
-        instructions::take,
-        tests::helper::{
-            make_ix, program_id, setup, ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID,
-        },
-    };
+    use crate::tests::helper::{make_ix, program_id, TOKEN_PROGRAM_ID};
     use litesvm_token::{CreateAssociatedTokenAccount, MintTo};
     use solana_keypair::Keypair;
     use solana_message::{AccountMeta, Instruction, Message};
     use solana_native_token::LAMPORTS_PER_SOL;
-    use solana_pubkey::Pubkey;
     use solana_signer::Signer;
     use solana_transaction::Transaction;
 
@@ -70,7 +64,7 @@ mod test {
         let transaction: Transaction = Transaction::new(&[&taker], message, recent_blockhash);
         let tx = s.svm.send_transaction(transaction).unwrap();
 
-        // println!("Tx completed:{:?}", tx);
+        println!("Tx completed:{:?}", tx);
     }
 
     #[test]

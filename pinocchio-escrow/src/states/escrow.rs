@@ -1,7 +1,7 @@
 use pinocchio::{error::ProgramError, AccountView};
+use wincode::{SchemaRead, SchemaWrite};
 
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, SchemaRead, SchemaWrite)]
 pub struct Escrow {
     pub maker: [u8; 32],
     pub mint_a: [u8; 32],

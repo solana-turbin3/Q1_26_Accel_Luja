@@ -118,6 +118,7 @@ pub fn make_ix() -> Make {
     let transaction = Transaction::new(&[&payer], message, recent_blockhash);
 
     let tx = svm.send_transaction(transaction).unwrap();
+    println!("Tx completed:{:?}", tx);
 
     Make {
         svm,
