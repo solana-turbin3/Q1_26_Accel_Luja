@@ -1,0 +1,3 @@
+[submodule "git-rust"]
+	path = git-rust
+	url = https://github.com/solana-turbin3/accel-challenge-week3-breakout4

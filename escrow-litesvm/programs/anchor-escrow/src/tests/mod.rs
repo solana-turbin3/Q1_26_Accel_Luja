@@ -44,7 +44,7 @@ mod test {
 
         // Load program SO file
         let so_path =
-            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../target/deploy/anchor_escrow.so");
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../target/deploy/anchor_escrow.so");
 
         let program_data = std::fs::read(so_path).expect("Failed to read program SO file");
 

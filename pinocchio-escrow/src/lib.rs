@@ -1,5 +1,4 @@
 #![allow(unexpected_cfgs)]
-
 use pinocchio::{
     address::declare_id, entrypoint, error::ProgramError, AccountView, Address, ProgramResult,
 };
