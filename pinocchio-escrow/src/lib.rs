@@ -5,14 +5,9 @@ use pinocchio::{
 };
 
 use crate::instructions::{
-    normal::{
-        process_make_instruction, process_refund_instruction, process_take_instruction,
-        EscrowInstructions,
-    },
-    wincode::{
-        process_make2_instruction, process_refund2_instruction, process_take2_instruction,
-        EscrowInstructions2,
-    },
+    normal::{process_make_instruction, process_refund_instruction, process_take_instruction},
+    wincode::{process_make2_instruction, process_refund2_instruction, process_take2_instruction},
+    EscrowInstructions,
 };
 
 mod instructions;
@@ -38,15 +33,11 @@ pub fn process_instruction(
         EscrowInstructions::Make => process_make_instruction(accounts, data)?,
         EscrowInstructions::Take => process_take_instruction(accounts, data)?,
         EscrowInstructions::Refund => process_refund_instruction(accounts, data)?,
+        EscrowInstructions::Make2 => process_make2_instruction(accounts, data)?,
+        EscrowInstructions::Take2 => process_take2_instruction(accounts, data)?,
+        EscrowInstructions::Refund2 => process_refund2_instruction(accounts, data)?,
         _ => return Err(ProgramError::InvalidInstructionData)?,
     };
-
-    match EscrowInstructions2::try_from(discriminator)? {
-        EscrowInstructions2::Make2 => process_make2_instruction(accounts, data)?,
-        EscrowInstructions2::Take2 => process_take2_instruction(accounts, data)?,
-        EscrowInstructions2::Refund2 => process_refund2_instruction(accounts, data)?,
-        _ => return Err(ProgramError::InvalidInstructionData)?,
-    }
 
     Ok(())
 }

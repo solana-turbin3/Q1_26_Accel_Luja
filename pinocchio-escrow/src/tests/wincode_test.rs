@@ -1,14 +1,8 @@
 #[cfg(test)]
-mod cu_test;
-#[cfg(test)]
-mod helper;
-#[cfg(test)]
-mod wincode_test;
-#[cfg(test)]
 mod test {
     use std::vec;
 
-    use crate::tests::helper::{make_ix, program_id, TOKEN_PROGRAM_ID};
+    use crate::tests::helper::{make2_ix, make_ix, program_id, TOKEN_PROGRAM_ID};
     use litesvm_token::{CreateAssociatedTokenAccount, MintTo};
     use solana_keypair::Keypair;
     use solana_message::{AccountMeta, Instruction, Message};
@@ -17,12 +11,12 @@ mod test {
     use solana_transaction::Transaction;
 
     #[test]
-    pub fn make_instruction() {
-        make_ix();
+    pub fn make2_instruction() {
+        make2_ix();
     }
 
     #[test]
-    pub fn take_instruction() {
+    pub fn take2_instruction() {
         let taker = Keypair::new();
         let mut s = make_ix();
 
@@ -48,7 +42,7 @@ mod test {
             .send()
             .unwrap();
 
-        let take_ix = Instruction {
+        let take2_ix = Instruction {
             program_id: program_id(),
             accounts: vec![
                 AccountMeta::new(s.maker.pubkey(), false),
@@ -60,10 +54,10 @@ mod test {
                 AccountMeta::new(s.escrow_ata, false),
                 AccountMeta::new(TOKEN_PROGRAM_ID, false),
             ],
-            data: vec![1u8],
+            data: vec![4u8],
         };
 
-        let message = Message::new(&[take_ix], Some(&taker.pubkey()));
+        let message = Message::new(&[take2_ix], Some(&taker.pubkey()));
         let recent_blockhash = s.svm.latest_blockhash();
         let transaction: Transaction = Transaction::new(&[&taker], message, recent_blockhash);
         let tx = s.svm.send_transaction(transaction).unwrap();
@@ -72,10 +66,10 @@ mod test {
     }
 
     #[test]
-    pub fn refund_instruction() {
+    pub fn refund2_instruction() {
         let mut s = make_ix();
 
-        let refund_ix = Instruction {
+        let refund2_ix = Instruction {
             program_id: program_id(),
             accounts: vec![
                 AccountMeta::new(s.maker.pubkey(), true),
@@ -84,10 +78,10 @@ mod test {
                 AccountMeta::new(s.escrow_ata, false),
                 AccountMeta::new(TOKEN_PROGRAM_ID, false),
             ],
-            data: vec![2u8],
+            data: vec![5u8],
         };
 
-        let message = Message::new(&[refund_ix], Some(&s.maker.pubkey()));
+        let message = Message::new(&[refund2_ix], Some(&s.maker.pubkey()));
         let recent_blockhash = s.svm.latest_blockhash();
         let transaction = Transaction::new(&[&s.maker], message, recent_blockhash);
         let tx = s.svm.send_transaction(transaction);
