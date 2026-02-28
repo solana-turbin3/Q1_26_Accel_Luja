@@ -14,9 +14,9 @@ use solana_pubkey::Pubkey;
 use solana_signer::Signer;
 use solana_transaction::Transaction;
 
-const PROGRAM_ID: &str = "99AW8S9fD1QREzbE25W3uwo7DyjQvuzsYDfcdD6GZbVv";
-const TOKEN_PROGRAM_ID: Pubkey = spl_token::ID;
-const ASSOCIATED_TOKEN_PROGRAM_ID: &str = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+pub const PROGRAM_ID: &str = "99AW8S9fD1QREzbE25W3uwo7DyjQvuzsYDfcdD6GZbVv";
+pub const TOKEN_PROGRAM_ID: Pubkey = spl_token::ID;
+pub const ASSOCIATED_TOKEN_PROGRAM_ID: &str = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
 
 pub fn program_id() -> Pubkey {
     crate::ID

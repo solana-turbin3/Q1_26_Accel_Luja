@@ -58,7 +58,7 @@ pub fn process_take_instruction(accounts: &[AccountView], _data: &[u8]) -> Progr
     .invoke_signed(&[Signer::from(&seeds)])?;
 
     CloseAccount {
-        account: escrow_account,
+        account: escrow_ata,
         destination: maker,
         authority: escrow_account,
     }
