@@ -15,6 +15,7 @@ mod instructions;
 mod state;
 #[cfg(test)]
 mod tests;
+mod utils;
 
 declare_id!("9MBbGAcz2KvydYUGVCRNr8ZhiWPpSFXNhE4p8mw61egr");
 
