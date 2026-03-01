@@ -7,7 +7,6 @@ use pinocchio::{
 use pinocchio_pubkey::derive_address;
 use pinocchio_system::instructions::CreateAccount;
 use pinocchio_token::{instructions::Transfer, state::TokenAccount};
-use wincode::SchemaRead;
 
 use crate::{
     state::{contributer::Contributor, fundraiser::Fundraiser},
@@ -23,14 +22,12 @@ impl_load!(ContributeData);
 
 pub fn process_contribute_instruction(accounts: &[AccountView], data: &[u8]) -> ProgramResult {
     let [
-        contributer,
+        contributor,
         mint,
         fundraiser_account,
         contributor_account,
         contributor_ata,
         fundraiser_ata,
-        token_program,
-        system_program,
         _remaining @ ..,
     ] = accounts
     else {
@@ -39,7 +36,7 @@ pub fn process_contribute_instruction(accounts: &[AccountView], data: &[u8]) -> 
 
     {
         let contributor_ata_state = TokenAccount::from_account_view(contributor_ata)?;
-        if contributor_ata_state.owner() != contributer.address() {
+        if contributor_ata_state.owner() != contributor.address() {
             return Err(ProgramError::InvalidAccountData);
         }
         if contributor_ata_state.mint() != mint.address() {
@@ -54,7 +51,7 @@ pub fn process_contribute_instruction(accounts: &[AccountView], data: &[u8]) -> 
     let seed = [
         b"contributor",
         fundraiser_account.address().as_ref(),
-        contributer.address().as_ref(),
+        contributor.address().as_ref(),
         &[bump],
     ];
 
@@ -67,14 +64,14 @@ pub fn process_contribute_instruction(accounts: &[AccountView], data: &[u8]) -> 
     let seeds = [
         Seed::from(b"contributor"),
         Seed::from(fundraiser_account.address().as_ref()),
-        Seed::from(contributer.address().as_ref()),
+        Seed::from(contributor.address().as_ref()),
         Seed::from(&bump_seed),
     ];
 
     unsafe {
         if contributor_account.owner() != &crate::ID {
             CreateAccount {
-                from: contributer,
+                from: contributor,
                 to: contributor_account,
                 lamports: Rent::get()?.try_minimum_balance(Contributor::LEN)?,
                 space: Contributor::LEN as u64,
@@ -86,10 +83,11 @@ pub fn process_contribute_instruction(accounts: &[AccountView], data: &[u8]) -> 
         Transfer {
             from: contributor_ata,
             to: fundraiser_ata,
-            authority: contributer,
+            authority: contributor,
             amount,
         }
         .invoke()?;
+
         let mut contributor_data = contributor_account.try_borrow_mut()?;
         let contribute_state = Contributor::load_mut(&mut contributor_data)?;
         contribute_state.amount = u64::from_le_bytes(contribute_state.amount)

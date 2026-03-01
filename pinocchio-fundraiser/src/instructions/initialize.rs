@@ -77,14 +77,14 @@ pub fn process_initialize_instruction(accounts: &[AccountView], data: &[u8]) -> 
             .invoke()?;
 
             let mut data = fundraiser_account.try_borrow_mut()?;
-            let state = Fundraiser::load_mut(&mut data)?;
-            state.maker = *maker.address().as_array();
-            state.mint = *mint.address().as_array();
-            state.amount_to_raise = amount_to_raise.to_le_bytes();
-            state.current_amount = 0u64.to_le_bytes();
-            state.duration = duration;
-            state.time_started = Clock::get()?.unix_timestamp.to_le_bytes();
-            state.bump = bump;
+            let fundraiser_state = Fundraiser::load_mut(&mut data)?;
+            fundraiser_state.maker = *maker.address().as_array();
+            fundraiser_state.mint = *mint.address().as_array();
+            fundraiser_state.amount_to_raise = amount_to_raise.to_le_bytes();
+            fundraiser_state.current_amount = 0u64.to_le_bytes();
+            fundraiser_state.duration = duration;
+            fundraiser_state.time_started = Clock::get()?.unix_timestamp.to_le_bytes();
+            fundraiser_state.bump = bump;
         } else {
             return Err(ProgramError::IllegalOwner);
         }

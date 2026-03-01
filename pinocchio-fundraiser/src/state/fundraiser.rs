@@ -1,9 +1,5 @@
-use pinocchio::{AccountView, error::ProgramError};
-use wincode::{SchemaRead, SchemaWrite};
-
 use crate::utils::impl_load;
 #[repr(C)]
-#[derive(SchemaRead, SchemaWrite)]
 pub struct Fundraiser {
     pub maker: [u8; 32],
     pub mint: [u8; 32],
