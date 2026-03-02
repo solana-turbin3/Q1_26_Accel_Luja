@@ -5,9 +5,7 @@ macro_rules! impl_load {
 
             #[inline(always)]
             pub fn load(data: &[u8]) -> Result<&Self, pinocchio::error::ProgramError> {
-                if data.len() != Self::LEN
-                    || (data.as_ptr() as usize) % core::mem::align_of::<Self>() != 0
-                {
+                if data.len() != Self::LEN {
                     return Err(pinocchio::error::ProgramError::InvalidAccountData);
                 }
 

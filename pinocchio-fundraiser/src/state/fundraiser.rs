@@ -1,5 +1,5 @@
 use crate::utils::impl_load;
-#[repr(C)]
+#[repr(C, packed)]
 pub struct Fundraiser {
     pub maker: [u8; 32],
     pub mint: [u8; 32],

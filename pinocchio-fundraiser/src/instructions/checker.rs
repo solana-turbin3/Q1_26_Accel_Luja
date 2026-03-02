@@ -29,11 +29,13 @@ pub fn process_checker_instruction(accounts: &[AccountView], _data: &[u8]) -> Pr
         check_ata!(maker_ata, maker, mint);
         check_ata!(fundraiser_ata, fundraiser_account, mint);
     }
+    let bump;
 
-    let mut data = fundraiser_account.try_borrow_mut()?;
-    let fundraiser_state = Fundraiser::load_mut(&mut data)?;
-    let bump = fundraiser_state.bump;
-    let fundraiser_ata_state = TokenAccount::from_account_view(fundraiser_ata)?;
+    {
+        let data = fundraiser_account.try_borrow_mut()?;
+        let fundraiser_state = Fundraiser::load(&data)?;
+        bump = fundraiser_state.bump;
+    }
     let seed = [b"fundraiser", maker.address().as_ref(), &[bump]];
 
     let fundraiser_account_pda = derive_address(&seed, None, &crate::ID.to_bytes());
@@ -41,9 +43,11 @@ pub fn process_checker_instruction(accounts: &[AccountView], _data: &[u8]) -> Pr
     if fundraiser_account_pda != *fundraiser_account.address().as_array() {
         return Err(ProgramError::InvalidAccountData);
     }
-    if fundraiser_ata_state.amount() < u64::from_le_bytes(fundraiser_state.amount_to_raise) {
-        return Err(ProgramError::InvalidAccountData);
-    }
+
+    let amount = {
+        let ata_state = TokenAccount::from_account_view(fundraiser_ata)?;
+        ata_state.amount()
+    };
 
     let bump_seed = [bump];
     let seeds = [
@@ -53,7 +57,7 @@ pub fn process_checker_instruction(accounts: &[AccountView], _data: &[u8]) -> Pr
     ];
 
     Transfer {
-        amount: fundraiser_ata_state.amount(),
+        amount,
         authority: fundraiser_account,
         from: fundraiser_ata,
         to: maker_ata,

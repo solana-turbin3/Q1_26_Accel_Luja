@@ -10,7 +10,7 @@ use pinocchio_system::instructions::CreateAccount;
 
 use crate::{constants::MIN_AMOUNT_TO_RAISE, state::fundraiser::Fundraiser, utils::impl_load};
 
-#[repr(C)]
+#[repr(C, packed)]
 pub struct InitializeData {
     amount_to_raise: u64,
     duration: u8,
@@ -27,7 +27,7 @@ pub fn process_initialize_instruction(accounts: &[AccountView], data: &[u8]) -> 
         fundraiser_ata,
         token_program,
         system_program,
-        _remaining @ ..,
+        _associared_token_program @ ..,
     ] = accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
