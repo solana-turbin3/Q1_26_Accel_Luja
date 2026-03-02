@@ -98,11 +98,11 @@ pub fn process_contribute_instruction(accounts: &[AccountView], data: &[u8]) -> 
         }
 
         let mut contributor_data = contributor_account.try_borrow_mut()?;
-        let contributor_state = Contributor::load_mut(&mut contributor_data)?;
-        let max_amount = (u64::from_le_bytes(fundraiser_state.amount_to_raise)
-            * MAX_CONTRIBUTION_PERCENTAGE)
-            / PERCENTAGE_SCALER;
-        let contributor_amount = u64::from_le_bytes(contributor_state.amount);
+        // let contributor_state = Contributor::load_mut(&mut contributor_data)?;
+        // let max_amount = (u64::from_le_bytes(fundraiser_state.amount_to_raise)
+        //     * MAX_CONTRIBUTION_PERCENTAGE)
+        //     / PERCENTAGE_SCALER;
+        // let contributor_amount = u64::from_le_bytes(contributor_state.amount);
 
         // if amount == 0
         //     || amount >= max_amount

@@ -1,12 +1,11 @@
+#[cfg(test)]
+mod cu_test;
+#[cfg(test)]
 pub mod helper;
 
 #[cfg(test)]
 mod test {
-    use litesvm_token::{CreateAssociatedTokenAccount, MintTo};
-    use pinocchio::Address;
-    use solana_keypair::Keypair;
     use solana_message::{AccountMeta, Instruction, Message};
-    use solana_native_token::LAMPORTS_PER_SOL;
     use solana_pubkey::Pubkey;
     use solana_signer::Signer;
     use solana_transaction::Transaction;
@@ -54,6 +53,7 @@ mod test {
         let transaction = Transaction::new(&[&s.maker], message, recent_blockhash);
 
         let tx = s.svm.send_transaction(transaction).unwrap();
+        println!("TX: {:?}", tx);
     }
 
     #[test]
@@ -86,5 +86,6 @@ mod test {
         let transaction = Transaction::new(&[&s.contributor], message, recent_blockhash);
 
         let tx = s.svm.send_transaction(transaction).unwrap();
+        println!("TX: {:?}", tx);
     }
 }
