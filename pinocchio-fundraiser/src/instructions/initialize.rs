@@ -32,6 +32,9 @@ pub fn process_initialize_instruction(accounts: &[AccountView], data: &[u8]) -> 
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
+    if !maker.is_signer() {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
 
     let make_data = InitializeData::load(data)?;
 
@@ -39,8 +42,8 @@ pub fn process_initialize_instruction(accounts: &[AccountView], data: &[u8]) -> 
     let duration = make_data.duration;
     let bump = make_data.bump;
 
-    if amount_to_raise <= MIN_AMOUNT_TO_RAISE {
-        return Err(ProgramError::InvalidArgument);
+    if amount_to_raise < MIN_AMOUNT_TO_RAISE {
+        return Err(ProgramError::InvalidInstructionData);
     }
 
     let seed = [b"fundraiser", maker.address().as_ref(), &[bump]];

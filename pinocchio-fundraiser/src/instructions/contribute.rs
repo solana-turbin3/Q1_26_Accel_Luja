@@ -2,15 +2,16 @@ use pinocchio::{
     AccountView, ProgramResult,
     cpi::{Seed, Signer},
     error::ProgramError,
-    sysvars::{Sysvar, rent::Rent},
+    sysvars::{Sysvar, clock::Clock, rent::Rent},
 };
 use pinocchio_pubkey::derive_address;
 use pinocchio_system::instructions::CreateAccount;
 use pinocchio_token::{instructions::Transfer, state::TokenAccount};
 
 use crate::{
+    constants::{MAX_CONTRIBUTION_PERCENTAGE, PERCENTAGE_SCALER, SECONDS_TO_DAYS},
     state::{contributer::Contributor, fundraiser::Fundraiser},
-    utils::impl_load,
+    utils::{check_ata, impl_load},
 };
 
 #[repr(C)]
@@ -34,29 +35,62 @@ pub fn process_contribute_instruction(accounts: &[AccountView], data: &[u8]) -> 
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
+    if !contributor.is_signer() {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
     {
-        let contributor_ata_state = TokenAccount::from_account_view(contributor_ata)?;
-        if contributor_ata_state.owner() != contributor.address() {
-            return Err(ProgramError::InvalidAccountData);
-        }
-        if contributor_ata_state.mint() != mint.address() {
-            return Err(ProgramError::InvalidAccountData);
-        }
+        check_ata!(contributor_ata, contributor, mint);
+        check_ata!(fundraiser_ata, fundraiser_account, mint);
     }
 
     let contribute_data = ContributeData::load(data)?;
     let amount = contribute_data.amount;
-    let bump = contribute_data.bump;
+    let current_time = Clock::get()?.unix_timestamp;
 
-    let seed = [
+    let bump = contribute_data.bump;
+    let contributor_seed = [
         b"contributor",
         fundraiser_account.address().as_ref(),
         contributor.address().as_ref(),
         &[bump],
     ];
 
-    let contributor_account_pda = derive_address(&seed, None, crate::ID.as_array());
-    if contributor_account_pda != *contributor_account.address().as_array() {
+    let mut fundraiser_data = fundraiser_account.try_borrow_mut()?;
+    let mut contributor_data = contributor_account.try_borrow_mut()?;
+
+    let fundraiser_state = Fundraiser::load_mut(&mut fundraiser_data)?;
+    let contributor_state = Contributor::load_mut(&mut contributor_data)?;
+
+    let fundraiser_seed = [
+        b"fundraiser",
+        fundraiser_state.maker.as_ref(),
+        &[fundraiser_state.bump],
+    ];
+
+    let fundraiser_account_pda = derive_address(&fundraiser_seed, None, crate::ID.as_array());
+    let contributor_account_pda = derive_address(&contributor_seed, None, crate::ID.as_array());
+
+    if fundraiser_account_pda != *fundraiser_account.address().as_array()
+        || contributor_account_pda != *contributor_account.address().as_array()
+        || fundraiser_state.mint != *mint.address().as_array()
+    {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    let max_amount = (u64::from_le_bytes(fundraiser_state.amount_to_raise)
+        * MAX_CONTRIBUTION_PERCENTAGE)
+        / PERCENTAGE_SCALER;
+    let time_started = i64::from_le_bytes(fundraiser_state.time_started);
+    let contributor_amount = u64::from_le_bytes(contributor_state.amount);
+
+    if amount == 0
+        || amount >= max_amount
+        || contributor_amount >= max_amount && (contributor_amount + amount) > max_amount
+    {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+    if fundraiser_state.duration > ((current_time - time_started) / SECONDS_TO_DAYS) as u8 {
         return Err(ProgramError::InvalidAccountData);
     }
 
@@ -90,6 +124,7 @@ pub fn process_contribute_instruction(accounts: &[AccountView], data: &[u8]) -> 
 
         let mut contributor_data = contributor_account.try_borrow_mut()?;
         let contribute_state = Contributor::load_mut(&mut contributor_data)?;
+
         contribute_state.amount = u64::from_le_bytes(contribute_state.amount)
             .checked_add(amount)
             .ok_or(ProgramError::ArithmeticOverflow)?
@@ -97,6 +132,7 @@ pub fn process_contribute_instruction(accounts: &[AccountView], data: &[u8]) -> 
 
         let mut fundraiser_data = fundraiser_account.try_borrow_mut()?;
         let fundraiser_state = Fundraiser::load_mut(&mut fundraiser_data)?;
+
         fundraiser_state.current_amount = u64::from_le_bytes(fundraiser_state.current_amount)
             .checked_add(amount)
             .ok_or(ProgramError::ArithmeticOverflow)?

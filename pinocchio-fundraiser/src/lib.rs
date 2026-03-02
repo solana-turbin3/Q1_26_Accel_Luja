@@ -10,7 +10,6 @@ use crate::instructions::{
 };
 
 mod constants;
-mod error;
 mod instructions;
 mod state;
 #[cfg(test)]
@@ -40,3 +39,5 @@ pub fn process_instruction(
     }
     Ok(())
 }
+
+// checks for fundraiser and contributor
