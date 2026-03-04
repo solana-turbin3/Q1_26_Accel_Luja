@@ -1,7 +1,8 @@
 use anchor_lang::prelude::*;
 use mpl_core::{
+    instructions::{AddCollectionPluginV1CpiBuilder, CreateCollectionV2CpiBuilder},
+    types::{Attribute, Attributes, Plugin, PluginAuthority},
     ID as MPL_CORE_ID,
-    instructions::CreateCollectionV2CpiBuilder,
 };
 
 #[derive(Accounts)]
@@ -22,8 +23,12 @@ pub struct CreateCollection<'info> {
     pub mpl_core_program: UncheckedAccount<'info>,
 }
 impl<'info> CreateCollection<'info> {
-    pub fn create_collection(&mut self, name: String, uri: String, bumps: &CreateCollectionBumps) -> Result<()> {
-
+    pub fn create_collection(
+        &mut self,
+        name: String,
+        uri: String,
+        bumps: &CreateCollectionBumps,
+    ) -> Result<()> {
         // Signer seeds for the update authority
         let collection_key = self.collection.key();
         let signer_seeds = &[
@@ -40,6 +45,20 @@ impl<'info> CreateCollection<'info> {
             .system_program(&self.system_program.to_account_info())
             .name(name)
             .uri(uri)
+            .invoke_signed(&[signer_seeds])?;
+
+        AddCollectionPluginV1CpiBuilder::new(&self.mpl_core_program.to_account_info())
+            .collection(&self.collection.to_account_info())
+            .payer(&self.payer.to_account_info())
+            .authority(Some(&self.update_authority.to_account_info()))
+            .system_program(&self.system_program.to_account_info())
+            .plugin(Plugin::Attributes(Attributes {
+                attribute_list: vec![Attribute {
+                    key: "total_staked".to_string(),
+                    value: "0".to_string(),
+                }],
+            }))
+            .init_authority(PluginAuthority::UpdateAuthority)
             .invoke_signed(&[signer_seeds])?;
 
         Ok(())

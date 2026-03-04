@@ -16,4 +16,6 @@ pub enum StakingError {
     FreezePeriodNotElapsed,
     #[msg("Overflow")]
     Overflow,
+    #[msg("Collection Attribute not found")]
+    CollectionAttributeNotFound,
 }

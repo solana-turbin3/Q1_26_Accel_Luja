@@ -1,8 +1,8 @@
 use anchor_lang::prelude::*;
 
-mod state;
-mod instructions;
 mod errors;
+mod instructions;
+mod state;
 use instructions::*;
 
 declare_id!("6uiX9YKHzBVws1TU8haqkZaRkz9v5knmizcPUwFy23Mv");
@@ -11,7 +11,11 @@ declare_id!("6uiX9YKHzBVws1TU8haqkZaRkz9v5knmizcPUwFy23Mv");
 pub mod nft_staking_core {
     use super::*;
 
-    pub fn create_collection(ctx: Context<CreateCollection>, name: String, uri: String) -> Result<()> {
+    pub fn create_collection(
+        ctx: Context<CreateCollection>,
+        name: String,
+        uri: String,
+    ) -> Result<()> {
         ctx.accounts.create_collection(name, uri, &ctx.bumps)
     }
 
@@ -19,8 +23,14 @@ pub mod nft_staking_core {
         ctx.accounts.mint_nft(name, uri, &ctx.bumps)
     }
 
-    pub fn initialize_config(ctx: Context<InitConfig>, points_per_stake: u32, freeze_period: u8) -> Result<()> {
-        ctx.accounts.init_config(points_per_stake, freeze_period, &ctx.bumps)
+    pub fn initialize_config(
+        ctx: Context<InitConfig>,
+        points_per_stake: u32,
+        burn_rewards: u32,
+        freeze_period: u8,
+    ) -> Result<()> {
+        ctx.accounts
+            .init_config(points_per_stake, burn_rewards, freeze_period, &ctx.bumps)
     }
 
     pub fn stake(ctx: Context<Stake>) -> Result<()> {
@@ -31,4 +41,11 @@ pub mod nft_staking_core {
         ctx.accounts.unstake(&ctx.bumps)
     }
 
+    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
+        ctx.accounts.claim_rewards(ctx.bumps)
+    }
+
+    pub fn burn_staked_nft(ctx: Context<BurnStakedNft>) -> Result<()> {
+        ctx.accounts.burn_staked_nft(ctx.bumps)
+    }
 }
