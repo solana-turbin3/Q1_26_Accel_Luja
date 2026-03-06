@@ -22,9 +22,6 @@ pub struct UpdateOracle<'info> {
     )]
     pub oracle: Account<'info, Oracle>,
 
-    /// CHECK: verified by MPL program
-    #[account(mut)]
-    pub collection: UncheckedAccount<'info>,
     #[account(
         seeds=[b"reward_vault",oracle.key().as_ref()],
         bump

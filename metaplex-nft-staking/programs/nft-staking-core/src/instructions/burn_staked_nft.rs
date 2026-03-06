@@ -8,7 +8,9 @@ use anchor_spl::{
 use mpl_core::{
     accounts::{BaseAssetV1, BaseCollectionV1},
     fetch_plugin,
-    instructions::{UpdateCollectionPluginV1CpiBuilder, UpdatePluginV1CpiBuilder},
+    instructions::{
+        BurnV1CpiBuilder, UpdateCollectionPluginV1CpiBuilder, UpdatePluginV1CpiBuilder,
+    },
     types::{
         Attribute, Attributes, BurnDelegate, FreezeDelegate, Plugin, PluginType, UpdateAuthority,
     },
@@ -132,16 +134,6 @@ impl<'info> BurnStakedNft<'info> {
             .checked_div(SECONDS_PER_DAY)
             .ok_or(StakingError::InvalidTimestamp)?;
 
-        // Update attributes
-        UpdatePluginV1CpiBuilder::new(&self.mpl_core_program.to_account_info())
-            .asset(&self.nft.to_account_info())
-            .collection(Some(&self.collection.to_account_info()))
-            .payer(&self.user.to_account_info())
-            .authority(Some(&self.update_authority.to_account_info()))
-            .system_program(&self.system_program.to_account_info())
-            .plugin(Plugin::Attributes(Attributes { attribute_list }))
-            .invoke_signed(&[signer_seeds])?;
-
         // unfreeze
         UpdatePluginV1CpiBuilder::new(&self.mpl_core_program.to_account_info())
             .asset(&self.nft.to_account_info())
@@ -153,14 +145,13 @@ impl<'info> BurnStakedNft<'info> {
             .invoke_signed(&[signer_seeds])?;
 
         // burn
-        UpdatePluginV1CpiBuilder::new(&self.mpl_core_program.to_account_info())
+        BurnV1CpiBuilder::new(&self.mpl_core_program.to_account_info())
             .asset(&self.nft.to_account_info())
             .collection(Some(&self.collection.to_account_info()))
+            .authority(Some(&self.user.to_account_info()))
             .payer(&self.user.to_account_info())
-            .authority(Some(&self.update_authority.to_account_info()))
-            .system_program(&self.system_program.to_account_info())
-            .plugin(Plugin::BurnDelegate(BurnDelegate {}))
-            .invoke_signed(&[signer_seeds])?;
+            .system_program(Some(&self.system_program.to_account_info()))
+            .invoke()?;
 
         // Updating Collection
         match fetch_plugin::<BaseCollectionV1, Attributes>(

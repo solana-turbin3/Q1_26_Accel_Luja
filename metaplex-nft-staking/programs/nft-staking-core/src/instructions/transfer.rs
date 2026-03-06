@@ -16,15 +16,14 @@ pub struct Transfer<'info> {
     pub collection: UncheckedAccount<'info>,
 
     /// CHECK: The new owner of NFT
-    pub new_owner: UncheckedAccount<'info>,
+    pub new_owner: AccountInfo<'info>,
 
-    #[account(seeds=[b"oracle"],bump)]
+    #[account(seeds=[b"oracle"],bump=oracle.bump)]
     pub oracle: Account<'info, Oracle>,
 
     /// CHECK: This is the ID of the Metaplex Core program
     #[account(address = MPL_CORE_ID)]
     pub mpl_core_program: UncheckedAccount<'info>,
-
     pub system_program: Program<'info, System>,
 }
 
