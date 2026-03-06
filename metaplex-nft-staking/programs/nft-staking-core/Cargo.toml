@@ -24,7 +24,7 @@ custom-panic = []
 anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
 anchor-spl = "0.32.1"
 mpl-core = { version = "0.11.1", features = ["anchor"] }
-solana-program = "4.0.0"
+# solana-program = "4.0.0"
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = [

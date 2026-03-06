@@ -1,9 +1,17 @@
 use anchor_lang::prelude::*;
 use mpl_core::{
-    instructions::{AddCollectionPluginV1CpiBuilder, CreateCollectionV2CpiBuilder},
-    types::{Attribute, Attributes, Plugin, PluginAuthority},
+    instructions::{
+        AddCollectionExternalPluginAdapterV1CpiBuilder, AddCollectionPluginV1CpiBuilder,
+        CreateCollectionV2CpiBuilder,
+    },
+    types::{
+        Attribute, Attributes, ExternalCheckResult, ExternalPluginAdapterInitInfo,
+        HookableLifecycleEvent, OracleInitInfo, Plugin, PluginAuthority, ValidationResultsOffset,
+    },
     ID as MPL_CORE_ID,
 };
+
+use crate::constants::ORACLE_ACCOUNT;
 
 #[derive(Accounts)]
 pub struct CreateCollection<'info> {
@@ -60,6 +68,25 @@ impl<'info> CreateCollection<'info> {
             }))
             .init_authority(PluginAuthority::UpdateAuthority)
             .invoke_signed(&[signer_seeds])?;
+
+        AddCollectionExternalPluginAdapterV1CpiBuilder::new(
+            &self.mpl_core_program.to_account_info(),
+        )
+        .collection(&self.collection.to_account_info())
+        .payer(&self.payer.to_account_info())
+        .authority(Some(&self.update_authority.to_account_info()))
+        .system_program(&self.system_program.to_account_info())
+        .init_info(ExternalPluginAdapterInitInfo::Oracle(OracleInitInfo {
+            base_address: ORACLE_ACCOUNT,
+            results_offset: Some(ValidationResultsOffset::Anchor),
+            lifecycle_checks: vec![(
+                HookableLifecycleEvent::Transfer,
+                ExternalCheckResult { flags: 4 },
+            )],
+            init_plugin_authority: None,
+            base_address_config: None,
+        }))
+        .invoke_signed(&[signer_seeds])?;
 
         Ok(())
     }

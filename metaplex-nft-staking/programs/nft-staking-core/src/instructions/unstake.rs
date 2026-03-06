@@ -179,7 +179,10 @@ impl<'info> Unstake<'info> {
                         let current: u64 = attribute.value.parse().unwrap_or(0);
                         collection_attribute_list.push(Attribute {
                             key: "total_staked".to_string(),
-                            value: (current - 1).to_string(),
+                            value: current
+                                .checked_sub(1)
+                                .ok_or(StakingError::Overflow)?
+                                .to_string(),
                         });
                     } else {
                         collection_attribute_list.push(attribute);

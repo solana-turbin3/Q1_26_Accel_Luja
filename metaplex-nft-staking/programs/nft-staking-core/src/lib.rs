@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
 
+mod constants;
 mod errors;
+mod helper;
 mod instructions;
 mod state;
 use instructions::*;
@@ -32,6 +34,9 @@ pub mod nft_staking_core {
         ctx.accounts
             .init_config(points_per_stake, burn_rewards, freeze_period, &ctx.bumps)
     }
+    pub fn initialize_oracle(ctx: Context<InitOracle>) -> Result<()> {
+        ctx.accounts.init_oracle(ctx.bumps)
+    }
 
     pub fn stake(ctx: Context<Stake>) -> Result<()> {
         ctx.accounts.stake(&ctx.bumps)
@@ -47,5 +52,12 @@ pub mod nft_staking_core {
 
     pub fn burn_staked_nft(ctx: Context<BurnStakedNft>) -> Result<()> {
         ctx.accounts.burn_staked_nft(ctx.bumps)
+    }
+    pub fn update_oracle(ctx: Context<UpdateOracle>) -> Result<()> {
+        ctx.accounts.update_oracle()
+    }
+
+    pub fn transfer(ctx: Context<Transfer>) -> Result<()> {
+        ctx.accounts.transfer()
     }
 }

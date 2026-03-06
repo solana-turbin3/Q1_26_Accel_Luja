@@ -18,4 +18,6 @@ pub enum StakingError {
     Overflow,
     #[msg("Collection Attribute not found")]
     CollectionAttributeNotFound,
+    #[msg("Oracle Already Updated")]
+    OracleAlreadyUpdated,
 }
